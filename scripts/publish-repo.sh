@@ -15,6 +15,7 @@ source "${META_FILE}"
 
 mkdir -p "${REPO_DIR}" "${ROOT_DIR}/refs" "${SITE_DIR}"
 find "${ROOT_DIR}/refs" -maxdepth 1 -type f -name '*.flatpakref' -delete
+mkdir -p "${REPO_DIR}/refs/remotes"
 
 gpg_homedir=""
 gpg_key_id="${FLATPAK_GPG_KEY_ID:-}"

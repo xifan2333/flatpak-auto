@@ -7,14 +7,13 @@
     <meta name="description" content="Reusable Flatpak repository for personal projects">
     <style>
       :root {
-        --bg: #f6f1e8;
-        --paper: rgba(255, 251, 245, 0.9);
-        --ink: #1e1c1a;
-        --muted: #6d655d;
-        --line: rgba(44, 34, 24, 0.14);
-        --accent: #bb4d00;
-        --accent-soft: #ffcf99;
-        --shadow: 0 18px 50px rgba(55, 38, 14, 0.12);
+        --bg: #f7f7f5;
+        --panel: #ffffff;
+        --ink: #171717;
+        --muted: #666;
+        --line: #e7e5e1;
+        --accent: #b45309;
+        --accent-soft: #fff1e6;
       }
 
       * { box-sizing: border-box; }
@@ -22,51 +21,38 @@
       body {
         margin: 0;
         color: var(--ink);
-        background:
-          radial-gradient(circle at top left, rgba(255, 214, 153, 0.6), transparent 34%),
-          radial-gradient(circle at top right, rgba(231, 90, 0, 0.14), transparent 26%),
-          linear-gradient(180deg, #f7efe4 0%, #f3ecdf 48%, #efe8dc 100%);
+        background: var(--bg);
         font-family: "Avenir Next", "Helvetica Neue", "Noto Sans", sans-serif;
       }
 
       a {
-        color: inherit;
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
       }
 
       .page {
-        width: min(1120px, calc(100vw - 32px));
+        width: min(980px, calc(100vw - 28px));
         margin: 0 auto;
-        padding: 36px 0 56px;
+        padding: 22px 0 40px;
       }
 
       .hero {
-        position: relative;
-        overflow: hidden;
-        padding: 34px;
+        padding: 22px 24px;
         border: 1px solid var(--line);
-        border-radius: 28px;
-        background:
-          linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(255, 245, 231, 0.88)),
-          linear-gradient(120deg, rgba(255, 182, 93, 0.16), rgba(187, 77, 0, 0.08));
-        box-shadow: var(--shadow);
-      }
-
-      .hero::after {
-        content: "";
-        position: absolute;
-        inset: auto -80px -80px auto;
-        width: 220px;
-        height: 220px;
-        border-radius: 999px;
-        background: radial-gradient(circle, rgba(187, 77, 0, 0.18), transparent 70%);
+        border-radius: 18px;
+        background: var(--panel);
       }
 
       .eyebrow {
-        margin: 0 0 10px;
+        margin: 0 0 8px;
         color: var(--accent);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 700;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.14em;
         text-transform: uppercase;
       }
 
@@ -76,144 +62,148 @@
 
       h1 {
         margin: 0;
-        font-size: clamp(2.3rem, 5vw, 4.5rem);
-        line-height: 0.96;
-        max-width: 10ch;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        line-height: 1.02;
+        letter-spacing: -0.03em;
       }
 
       .hero-copy {
-        max-width: 760px;
-        margin-top: 18px;
-        font-size: 1.02rem;
-        line-height: 1.7;
+        max-width: 700px;
+        margin: 10px 0 0;
+        font-size: 0.97rem;
+        line-height: 1.6;
         color: var(--muted);
       }
 
       .quick-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-        margin-top: 24px;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 12px;
+        margin-top: 18px;
       }
 
       .panel {
-        padding: 20px;
+        padding: 14px;
         border: 1px solid var(--line);
-        border-radius: 20px;
-        background: var(--paper);
+        border-radius: 14px;
+        background: #fbfbfa;
       }
 
       .panel h3 {
-        margin: 0 0 12px;
-        font-size: 1rem;
+        margin: 0 0 8px;
+        font-size: 0.96rem;
       }
 
       .panel p {
-        margin: 0 0 12px;
+        margin: 0 0 8px;
         color: var(--muted);
-        line-height: 1.6;
+        line-height: 1.55;
+        font-size: 0.92rem;
       }
 
       pre {
         margin: 0;
-        padding: 14px 16px;
+        padding: 10px 12px;
         overflow-x: auto;
-        border-radius: 16px;
-        background: #201812;
-        color: #fff6eb;
-        font-size: 0.94rem;
-        line-height: 1.5;
+        border: 1px solid #ebe8e2;
+        border-radius: 12px;
+        background: #f5f5f3;
+        color: #171717;
+        font-size: 0.87rem;
+        line-height: 1.45;
       }
 
       .subhead {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        margin: 34px 0 16px;
+        gap: 10px;
+        margin: 22px 0 12px;
       }
 
       .subhead h2 {
         margin: 0;
-        font-size: clamp(1.4rem, 2vw, 2rem);
+        font-size: clamp(1.15rem, 2vw, 1.45rem);
       }
 
       .subhead p {
         margin: 0;
         color: var(--muted);
+        font-size: 0.92rem;
       }
 
       .pill-link {
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
+        gap: 8px;
+        padding: 8px 11px;
         border-radius: 999px;
-        border: 1px solid rgba(187, 77, 0, 0.2);
-        background: rgba(255, 241, 224, 0.9);
+        border: 1px solid #f1d3ba;
+        background: var(--accent-soft);
         text-decoration: none;
-        font-size: 0.92rem;
+        font-size: 0.86rem;
+        color: #8a3b00;
       }
 
       .products {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 18px;
+        gap: 12px;
       }
 
       .product-card {
-        padding: 22px;
+        padding: 14px 16px;
         border: 1px solid var(--line);
-        border-radius: 22px;
-        background: var(--paper);
-        box-shadow: var(--shadow);
+        border-radius: 16px;
+        background: var(--panel);
       }
 
       .product-head {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: 10px;
       }
 
       .product-head h2 {
         margin: 0;
-        font-size: 1.32rem;
+        font-size: 1.05rem;
       }
 
       .version-badge {
         flex: none;
-        padding: 8px 10px;
+        padding: 5px 8px;
         border-radius: 999px;
         background: var(--accent-soft);
-        font-size: 0.84rem;
+        font-size: 0.78rem;
         font-weight: 700;
+        color: #8a3b00;
       }
 
       .product-desc {
-        min-height: 3.2em;
+        margin: 8px 0 0;
         color: var(--muted);
-        line-height: 1.6;
+        line-height: 1.45;
+        font-size: 0.92rem;
       }
 
       .meta-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-        margin: 18px 0;
+        gap: 8px;
+        margin: 12px 0;
       }
 
       .meta-grid div {
-        padding: 12px;
-        border-radius: 16px;
-        background: rgba(255, 250, 243, 0.9);
+        padding: 9px 10px;
+        border-radius: 12px;
+        background: #fbfbfa;
         border: 1px solid var(--line);
       }
 
       .meta-grid dt {
-        margin-bottom: 6px;
+        margin-bottom: 4px;
         color: var(--muted);
-        font-size: 0.8rem;
+        font-size: 0.72rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
       }
@@ -221,38 +211,42 @@
       .meta-grid dd {
         margin: 0;
         overflow-wrap: anywhere;
+        font-size: 0.9rem;
       }
 
-      .command-block {
-        margin-top: 14px;
-      }
-
-      .command-block.alternate pre {
-        background: #2c2218;
+      .command-row {
+        display: grid;
+        grid-template-columns: 56px 1fr;
+        gap: 8px;
+        align-items: start;
+        margin-top: 8px;
       }
 
       .command-label {
-        margin: 0 0 8px;
+        display: inline-flex;
+        align-items: center;
+        height: 34px;
+        margin: 0;
         color: var(--muted);
-        font-size: 0.88rem;
+        font-size: 0.8rem;
       }
 
       footer {
-        margin-top: 30px;
-        padding: 18px 0 4px;
+        margin-top: 18px;
+        padding: 8px 0 0;
         color: var(--muted);
-        font-size: 0.92rem;
+        font-size: 0.84rem;
       }
 
       @media (max-width: 760px) {
         .page {
           width: min(100vw - 20px, 1120px);
-          padding-top: 18px;
+          padding-top: 14px;
         }
 
         .hero {
-          padding: 22px;
-          border-radius: 24px;
+          padding: 16px;
+          border-radius: 16px;
         }
 
         .quick-grid,
@@ -264,6 +258,14 @@
           flex-direction: column;
           align-items: flex-start;
         }
+
+        .command-row {
+          grid-template-columns: 1fr;
+        }
+
+        .command-label {
+          height: auto;
+        }
       }
     </style>
   </head>
@@ -271,21 +273,19 @@
     <main class="page">
       <section class="hero">
         <p class="eyebrow">Reusable Flatpak Remote</p>
-        <h1>Install personal packages from one remote.</h1>
+        <h1>One remote. Small surface area.</h1>
         <p class="hero-copy">
-          Reusable Flatpak repository for personal projects This page is generated from product metadata and
-          updated automatically by GitHub Actions whenever a tracked upstream
-          release changes.
+          Reusable Flatpak repository for personal projects Add the remote once, then install any package below by app ID.
         </p>
         <div class="quick-grid">
           <section class="panel">
             <h3>Add the remote</h3>
-            <p>Run this once on a machine. After that, every package below can be installed by app ID.</p>
+            <p>Run once per machine.</p>
             <pre><code>flatpak remote-add --if-not-exists xifan https://xifan2333.github.io/flatpak-auto/xifan.flatpakrepo</code></pre>
           </section>
           <section class="panel">
-            <h3>Repository files</h3>
-            <p>Use the remote file for normal setup, or browse individual package refs directly.</p>
+            <h3>Links</h3>
+            <p>Remote metadata and raw repo.</p>
             <p><a class="pill-link" href="https://xifan2333.github.io/flatpak-auto/xifan.flatpakrepo">Open .flatpakrepo</a></p>
             <p><a class="pill-link" href="https://xifan2333.github.io/flatpak-auto/repo/">Browse OSTree repo</a></p>
           </section>
@@ -296,17 +296,14 @@
         <div class="subhead">
           <div>
             <h2>Package List</h2>
-            <p>Each package card includes the install command and a direct flatpakref link.</p>
+            <p>Compact install targets from tracked upstream releases.</p>
           </div>
           <a class="pill-link" href="https://github.com/xifan2333">Repository owner</a>
         </div>
         <div class="products">
         <article class="product-card">
           <div class="product-head">
-            <div>
-              <p class="eyebrow">Package</p>
-              <h2>Vinput</h2>
-            </div>
+            <h2>Vinput</h2>
             <span class="version-badge">1.1.7</span>
           </div>
           <p class="product-desc">Offline voice input addon for Fcitx5 with optional OpenAI-compatible postprocess</p>
@@ -328,12 +325,12 @@
               <dd><a href="https://xifan2333.github.io/flatpak-auto/refs/org.fcitx.Fcitx5.Addon.Vinput.flatpakref">download</a></dd>
             </div>
           </dl>
-          <div class="command-block">
-            <p class="command-label">Install after adding the remote</p>
+          <div class="command-row">
+            <span class="command-label">Install</span>
             <pre><code>flatpak install xifan org.fcitx.Fcitx5.Addon.Vinput</code></pre>
           </div>
-          <div class="command-block alternate">
-            <p class="command-label">Direct install</p>
+          <div class="command-row">
+            <span class="command-label">Direct</span>
             <pre><code>flatpak install https://xifan2333.github.io/flatpak-auto/refs/org.fcitx.Fcitx5.Addon.Vinput.flatpakref</code></pre>
           </div>
         </article>

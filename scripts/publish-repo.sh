@@ -68,6 +68,7 @@ fi
 
 rm -rf "${SITE_DIR}"
 mkdir -p "${SITE_DIR}/refs"
+bash "${ROOT_DIR}/scripts/render-index.sh" "${SITE_DIR}/index.html"
 cp -a "${REPO_DIR}" "${SITE_DIR}/repo"
 while IFS= read -r -d '' ref_file; do
   cp "${ref_file}" "${SITE_DIR}/refs/"

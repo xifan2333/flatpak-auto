@@ -1,0 +1,10 @@
+[Flatpak Ref]
+Version=1
+Name=org.fcitx.Fcitx5.Addon.Vinput
+Branch=stable
+Title=Vinput
+IsRuntime=false
+Url=https://flatpak.example.com/repo/
+RuntimeRepo=https://flathub.org/repo/flathub.flatpakrepo
+Homepage=https://github.com/xifan2333/fcitx5-vinput
+GPGKey=BASE64_ENCODED_PUBLIC_KEY

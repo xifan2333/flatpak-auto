@@ -1,0 +1,137 @@
+name: sync-and-publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: Product name to sync. Leave empty for all.
+        required: false
+        type: string
+      force:
+        description: Force re-import even if version did not change.
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    - cron: '17 3 * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/sync-and-publish.yml'
+      - 'metadata/**'
+      - 'products/**'
+      - 'scripts/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: flatpak-publish
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak ostree jq
+
+      - name: Restore published repo state
+        shell: bash
+        run: |
+          if git ls-remote --exit-code origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            tmpdir="$(mktemp -d)"
+            git worktree add "${tmpdir}" origin/gh-pages
+            if [[ -d "${tmpdir}/repo" ]]; then
+              rm -rf repo
+              cp -a "${tmpdir}/repo" ./repo
+            fi
+            git worktree remove "${tmpdir}" --force
+          fi
+
+      - name: Sync products
+        shell: bash
+        env:
+          INPUT_PRODUCT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.product || '' }}
+          INPUT_FORCE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force || 'false' }}
+        run: |
+          force_flag=""
+          if [[ "${INPUT_FORCE}" == "true" ]]; then
+            force_flag="--force"
+          fi
+
+          if [[ -n "${INPUT_PRODUCT}" ]]; then
+            bash scripts/sync-product.sh "${INPUT_PRODUCT}" ${force_flag}
+            exit 0
+          fi
+
+          while IFS= read -r -d '' dir; do
+            product="$(basename "${dir}")"
+            bash scripts/sync-product.sh "${product}" ${force_flag}
+          done < <(find products -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
+
+      - name: Render metadata and site
+        env:
+          FLATPAK_GPG_KEY_ID: ${{ secrets.FLATPAK_GPG_KEY_ID }}
+          FLATPAK_GPG_PRIVATE_KEY_BASE64: ${{ secrets.FLATPAK_GPG_PRIVATE_KEY_BASE64 }}
+          FLATPAK_GPG_PUBLIC_KEY_BASE64: ${{ secrets.FLATPAK_GPG_PUBLIC_KEY_BASE64 }}
+        run: bash scripts/publish-repo.sh
+
+      - name: Commit product state updates
+        shell: bash
+        run: |
+          if [[ -z "$(git status --porcelain -- products)" ]]; then
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add products
+          git commit -m "chore: sync product release state"
+          git push
+
+      - name: Publish gh-pages branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          tmpdir="$(mktemp -d)"
+          cleanup() {
+            git worktree remove "${tmpdir}" --force >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          if git ls-remote --exit-code origin gh-pages >/dev/null 2>&1; then
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+            git worktree add "${tmpdir}" origin/gh-pages
+          else
+            git worktree add --detach "${tmpdir}"
+            (
+              cd "${tmpdir}"
+              git checkout --orphan gh-pages
+            )
+          fi
+
+          find "${tmpdir}" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a public/. "${tmpdir}/"
+          touch "${tmpdir}/.nojekyll"
+
+          (
+            cd "${tmpdir}"
+            git add -A
+            if git diff --cached --quiet; then
+              exit 0
+            fi
+            git commit -m "chore: publish flatpak repository"
+            git push origin HEAD:gh-pages
+          )

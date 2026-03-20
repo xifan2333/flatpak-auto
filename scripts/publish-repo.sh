@@ -16,6 +16,7 @@ source "${META_FILE}"
 mkdir -p "${REPO_DIR}" "${ROOT_DIR}/refs" "${SITE_DIR}"
 find "${ROOT_DIR}/refs" -maxdepth 1 -type f -name '*.flatpakref' -delete
 mkdir -p "${REPO_DIR}/refs/remotes"
+rm -rf "${REPO_DIR}/deltas"
 
 gpg_homedir=""
 gpg_key_id="${FLATPAK_GPG_KEY_ID:-}"
@@ -90,7 +91,7 @@ if [[ -n "${gpg_key_id}" && -n "${gpg_homedir}" ]]; then
   sign_repo_commits
 fi
 
-update_args=(flatpak build-update-repo "${REPO_DIR}" --generate-static-deltas)
+update_args=(flatpak build-update-repo "${REPO_DIR}")
 if [[ -n "${gpg_key_id}" && -n "${gpg_homedir}" ]]; then
   update_args+=(--gpg-sign="${gpg_key_id}" --gpg-homedir="${gpg_homedir}")
 fi

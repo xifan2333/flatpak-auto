@@ -35,7 +35,7 @@ jobs:
     if: github.event_name != 'push' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -111,7 +111,14 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add products
           git commit -m "chore: sync product release state"
-          git push
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git pull --rebase origin main
+          done
+          echo "Failed to push product state updates after retries." >&2
+          exit 1
 
       - name: Publish gh-pages branch
         if: steps.publish_ready.outputs.ready == 'true'

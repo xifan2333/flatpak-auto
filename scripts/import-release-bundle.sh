@@ -22,6 +22,15 @@ if [[ ! -f "${repo_dir}/config" ]]; then
   ostree init --repo="${repo_dir}" --mode=archive-z2
 fi
 
-flatpak build-import-bundle --no-update-summary "${repo_dir}" "${bundle_path}"
+import_args=(flatpak build-import-bundle --no-update-summary "${repo_dir}")
+if [[ -n "${FLATPAK_GPG_KEY_ID:-}" ]]; then
+  import_args+=(--gpg-sign="${FLATPAK_GPG_KEY_ID}")
+fi
+if [[ -n "${FLATPAK_GPG_HOMEDIR:-}" ]]; then
+  import_args+=(--gpg-homedir="${FLATPAK_GPG_HOMEDIR}")
+fi
+import_args+=("${bundle_path}")
+
+"${import_args[@]}"
 
 echo "Imported bundle into ${repo_dir}"

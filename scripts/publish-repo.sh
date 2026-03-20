@@ -48,6 +48,32 @@ if [[ -z "${public_key_b64}" ]]; then
   exit 1
 fi
 
+sign_repo_commits() {
+  local ref commit
+  declare -A seen_commits=()
+
+  while IFS= read -r ref; do
+    [[ -n "${ref}" ]] || continue
+
+    commit="$(ostree rev-parse --repo="${REPO_DIR}" "${ref}")"
+    [[ -n "${commit}" ]] || continue
+
+    if [[ -n "${seen_commits[${commit}]:-}" ]]; then
+      continue
+    fi
+
+    if ostree show --repo="${REPO_DIR}" --print-detached-metadata-key=ostree.gpgsigs "${commit}" >/dev/null 2>&1; then
+      echo "Commit ${commit} already has a GPG signature; skipping"
+      seen_commits["${commit}"]=1
+      continue
+    fi
+
+    echo "Signing ${commit} (${ref})"
+    ostree gpg-sign --repo="${REPO_DIR}" --gpg-homedir="${gpg_homedir}" "${commit}" "${gpg_key_id}"
+    seen_commits["${commit}"]=1
+  done < <(ostree refs --repo="${REPO_DIR}" 2>/dev/null || true)
+}
+
 GPG_KEY_BASE64="${public_key_b64}" bash "${ROOT_DIR}/scripts/render-flatpakrepo.sh" "${ROOT_DIR}/${REMOTE_NAME}.flatpakrepo"
 
 while IFS= read -r -d '' product_file; do
@@ -59,6 +85,10 @@ while IFS= read -r -d '' product_file; do
   output_path="${ROOT_DIR}/refs/${APP_ID}.flatpakref"
   GPG_KEY_BASE64="${public_key_b64}" bash "${ROOT_DIR}/scripts/render-flatpakref.sh" "${product_name}" "${output_path}"
 done < <(find "${ROOT_DIR}/products" -mindepth 2 -maxdepth 2 -name product.env -print0 | sort -z)
+
+if [[ -n "${gpg_key_id}" && -n "${gpg_homedir}" ]]; then
+  sign_repo_commits
+fi
 
 update_args=(flatpak build-update-repo "${REPO_DIR}" --generate-static-deltas)
 if [[ -n "${gpg_key_id}" && -n "${gpg_homedir}" ]]; then

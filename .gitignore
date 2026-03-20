@@ -1,0 +1,11 @@
+# Keep generated repository artifacts out of git on the main branch.
+repo/*
+!repo/.gitkeep
+public/
+refs/*.flatpakref
+/*.flatpakrepo
+
+# Local signing material must never be committed.
+*.gpg
+*.asc
+*.key

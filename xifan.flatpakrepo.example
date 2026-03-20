@@ -1,0 +1,8 @@
+[Flatpak Repo]
+Version=1
+Title=Xifan Flatpak Repository
+Comment=Reusable Flatpak repository, currently publishing fcitx5-vinput
+Homepage=https://github.com/xifan2333/fcitx5-vinput
+Url=https://flatpak.example.com/repo/
+DefaultBranch=stable
+GPGKey=BASE64_ENCODED_PUBLIC_KEY

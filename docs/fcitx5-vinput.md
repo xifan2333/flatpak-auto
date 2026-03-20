@@ -40,12 +40,12 @@ application from source.
 
 ## Required Public Endpoints
 
-Replace these placeholders before publishing:
+Current GitHub Pages target:
 
-- OSTree repo: `https://flatpak.example.com/repo/`
-- Remote file: `https://flatpak.example.com/xifan.flatpakrepo`
+- OSTree repo: `https://xifan2333.github.io/flatpak-auto/repo/`
+- Remote file: `https://xifan2333.github.io/flatpak-auto/xifan.flatpakrepo`
 - Ref file:
-  `https://flatpak.example.com/refs/org.fcitx.Fcitx5.Addon.Vinput.flatpakref`
+  `https://xifan2333.github.io/flatpak-auto/refs/org.fcitx.Fcitx5.Addon.Vinput.flatpakref`
 
 ## Next Steps For This Product
 

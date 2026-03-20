@@ -27,16 +27,19 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if [[ -n "${FLATPAK_GPG_PRIVATE_KEY_BASE64:-}" ]]; then
-  gpg_homedir="$(mktemp -d)"
-  chmod 700 "${gpg_homedir}"
-  printf '%s' "${FLATPAK_GPG_PRIVATE_KEY_BASE64}" | base64 -d | gpg --batch --homedir "${gpg_homedir}" --import
-  if [[ -z "${gpg_key_id}" ]]; then
-    gpg_key_id="$(gpg --batch --homedir "${gpg_homedir}" --list-secret-keys --with-colons | awk -F: '$1 == "sec" { print $5; exit }')"
-  fi
-  if [[ -z "${public_key_b64}" ]]; then
-    public_key_b64="$(gpg --batch --homedir "${gpg_homedir}" --export "${gpg_key_id}" | base64 | tr -d '\n')"
-  fi
+if [[ -z "${FLATPAK_GPG_PRIVATE_KEY_BASE64:-}" ]]; then
+  echo "Missing GPG private key. Set FLATPAK_GPG_PRIVATE_KEY_BASE64 before publishing." >&2
+  exit 1
+fi
+
+gpg_homedir="$(mktemp -d)"
+chmod 700 "${gpg_homedir}"
+printf '%s' "${FLATPAK_GPG_PRIVATE_KEY_BASE64}" | base64 -d | gpg --batch --homedir "${gpg_homedir}" --import
+if [[ -z "${gpg_key_id}" ]]; then
+  gpg_key_id="$(gpg --batch --homedir "${gpg_homedir}" --list-secret-keys --with-colons | awk -F: '$1 == "sec" { print $5; exit }')"
+fi
+if [[ -z "${public_key_b64}" ]]; then
+  public_key_b64="$(gpg --batch --homedir "${gpg_homedir}" --export "${gpg_key_id}" | base64 | tr -d '\n')"
 fi
 
 if [[ -z "${public_key_b64}" ]]; then

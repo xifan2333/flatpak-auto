@@ -65,13 +65,24 @@ fi
 current_version="${CURRENT_VERSION:-}"
 current_bundle_url="${CURRENT_BUNDLE_URL:-}"
 
+if [[ "${repo_dir}" = /* ]]; then
+  repo_path="${repo_dir}"
+else
+  repo_path="${ROOT_DIR}/${repo_dir}"
+fi
+
+repo_ready=0
+if [[ -f "${repo_path}/config" && -d "${repo_path}/objects" ]]; then
+  repo_ready=1
+fi
+
 if [[ -z "${version}" ]]; then
   version="$(product_detect_latest)"
 fi
 
 bundle_url="$(product_get_bundle_url "${version}")"
 
-if [[ ${force} -eq 0 && -n "${current_version}" && "${current_version}" == "${version}" && -n "${current_bundle_url}" && "${current_bundle_url}" == "${bundle_url}" ]]; then
+if [[ ${force} -eq 0 && ${repo_ready} -eq 1 && -n "${current_version}" && "${current_version}" == "${version}" && -n "${current_bundle_url}" && "${current_bundle_url}" == "${bundle_url}" ]]; then
   echo "Product ${product_name} already at ${version}; skipping import"
   exit 0
 fi

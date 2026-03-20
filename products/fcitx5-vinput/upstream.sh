@@ -1,11 +1,30 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+github_api_get() {
+  local url="$1"
+  local -a args
+  args=(
+    -fsSL
+    -H 'Accept: application/vnd.github+json'
+    -H 'X-GitHub-Api-Version: 2022-11-28'
+    -H 'User-Agent: flatpak-auto'
+  )
+
+  if [[ -n "${GH_TOKEN:-}" ]]; then
+    args+=(-H "Authorization: Bearer ${GH_TOKEN}")
+  elif [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    args+=(-H "Authorization: Bearer ${GITHUB_TOKEN}")
+  fi
+
+  curl "${args[@]}" "${url}"
+}
+
 product_detect_latest() {
   local api_url="https://api.github.com/repos/xifan2333/fcitx5-vinput/releases/latest"
   local json_data version
 
-  json_data="$(curl -fsSL "${api_url}")"
+  json_data="$(github_api_get "${api_url}")"
   if [[ -z "${json_data}" ]]; then
     echo "Failed to fetch data from ${api_url}" >&2
     return 1
@@ -26,7 +45,7 @@ product_get_bundle_url() {
   local json_data api_url bundle_url
 
   api_url="https://api.github.com/repos/xifan2333/fcitx5-vinput/releases/tags/v${version}"
-  json_data="$(curl -fsSL "${api_url}")"
+  json_data="$(github_api_get "${api_url}")"
   if [[ -z "${json_data}" ]]; then
     echo "Failed to fetch data from ${api_url}" >&2
     return 1

@@ -7,6 +7,10 @@ on:
         description: Product name to sync. Leave empty for all.
         required: false
         type: string
+      version:
+        description: Exact upstream version to sync. Leave empty for latest.
+        required: false
+        type: string
       force:
         description: Force re-import even if version did not change.
         required: false
@@ -63,21 +67,26 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           INPUT_PRODUCT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.product || '' }}
+          INPUT_VERSION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || '' }}
           INPUT_FORCE: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.force || 'false' }}
         run: |
           force_flag=""
+          version_flag=""
           if [[ "${INPUT_FORCE}" == "true" ]]; then
             force_flag="--force"
           fi
+          if [[ -n "${INPUT_VERSION}" ]]; then
+            version_flag="--version ${INPUT_VERSION}"
+          fi
 
           if [[ -n "${INPUT_PRODUCT}" ]]; then
-            bash scripts/sync-product.sh "${INPUT_PRODUCT}" ${force_flag}
+            bash scripts/sync-product.sh "${INPUT_PRODUCT}" ${force_flag} ${version_flag}
             exit 0
           fi
 
           while IFS= read -r -d '' dir; do
             product="$(basename "${dir}")"
-            bash scripts/sync-product.sh "${product}" ${force_flag}
+            bash scripts/sync-product.sh "${product}" ${force_flag} ${version_flag}
           done < <(find products -mindepth 1 -maxdepth 1 -type d -print0 | sort -z)
 
       - name: Check publish readiness

@@ -25,11 +25,40 @@ html_escape() {
   printf '%s' "${text}"
 }
 
+attr_escape() {
+  local text
+  text="$(html_escape "${1:-}")"
+  text="${text//\"/&quot;}"
+  text="${text//\'/&#39;}"
+  printf '%s' "${text}"
+}
+
 command_escape() {
   html_escape "$1"
 }
 
 products_html=""
+remote_cmd="flatpak remote-add --if-not-exists ${REMOTE_NAME} ${REMOTE_FILE_URL}"
+remote_file_name="${REMOTE_FILE_URL##*/}"
+
+products_html+=$(cat <<EOF
+        <article class="file-row">
+          <div class="file-main">
+            <div class="file-name-wrap">
+              <a class="file-name" href="$(html_escape "${REMOTE_FILE_URL}")">$(html_escape "${remote_file_name}")</a>
+              <span class="version-badge">remote</span>
+            </div>
+            <p class="file-desc">Remote definition file for $(html_escape "${REMOTE_TITLE}"). Add it once, then install any package from this repository.</p>
+          </div>
+          <div class="file-actions">
+            <button class="copy-button" type="button" data-copy="$(attr_escape "${remote_cmd}")">Copy install</button>
+          </div>
+          <div class="command-preview">
+            <code>$(command_escape "${remote_cmd}")</code>
+          </div>
+        </article>
+EOF
+)
 
 while IFS= read -r -d '' product_file; do
   product_dir="$(dirname "${product_file}")"
@@ -45,42 +74,24 @@ while IFS= read -r -d '' product_file; do
   fi
 
   version="${CURRENT_VERSION:-pending}"
+  ref_file="${APP_ID}.flatpakref"
   ref_url="${REMOTE_FILE_URL%/*}/refs/${APP_ID}.flatpakref"
-  install_cmd="flatpak install ${REMOTE_NAME} ${APP_ID}"
-  direct_cmd="flatpak install ${ref_url}"
+  install_cmd="flatpak install ${ref_url}"
 
   products_html+=$(cat <<EOF
-        <article class="product-card">
-          <div class="product-head">
-            <h2>$(html_escape "${TITLE}")</h2>
-            <span class="version-badge">$(html_escape "${version}")</span>
+        <article class="file-row">
+          <div class="file-main">
+            <div class="file-name-wrap">
+              <a class="file-name" href="$(html_escape "${ref_url}")">$(html_escape "${ref_file}")</a>
+              <span class="version-badge">$(html_escape "${version}")</span>
+            </div>
+            <p class="file-desc">$(html_escape "${TITLE}") · $(html_escape "${DESCRIPTION:-No description available.}")</p>
           </div>
-          <p class="product-desc">$(html_escape "${DESCRIPTION:-No description available.}")</p>
-          <dl class="meta-grid">
-            <div>
-              <dt>App ID</dt>
-              <dd><code>$(html_escape "${APP_ID}")</code></dd>
-            </div>
-            <div>
-              <dt>Branch</dt>
-              <dd><code>$(html_escape "${BRANCH}")</code></dd>
-            </div>
-            <div>
-              <dt>Upstream</dt>
-              <dd><a href="https://github.com/$(html_escape "${UPSTREAM_REPO}")">$(html_escape "${UPSTREAM_REPO}")</a></dd>
-            </div>
-            <div>
-              <dt>Flatpakref</dt>
-              <dd><a href="$(html_escape "${ref_url}")">download</a></dd>
-            </div>
-          </dl>
-          <div class="command-row">
-            <span class="command-label">Install</span>
-            <pre><code>$(command_escape "${install_cmd}")</code></pre>
+          <div class="file-actions">
+            <button class="copy-button" type="button" data-copy="$(attr_escape "${install_cmd}")">Copy install</button>
           </div>
-          <div class="command-row">
-            <span class="command-label">Direct</span>
-            <pre><code>$(command_escape "${direct_cmd}")</code></pre>
+          <div class="command-preview">
+            <code>$(command_escape "${install_cmd}")</code>
           </div>
         </article>
 EOF
@@ -99,13 +110,16 @@ cat > "${OUTPUT_PATH}" <<EOF
     <meta name="description" content="$(html_escape "${REMOTE_COMMENT}")">
     <style>
       :root {
-        --bg: #f7f7f5;
+        --bg: #f3efe7;
         --panel: #ffffff;
         --ink: #171717;
         --muted: #666;
-        --line: #e7e5e1;
-        --accent: #b45309;
-        --accent-soft: #fff1e6;
+        --line: #ddd2c4;
+        --accent: #9a3412;
+        --accent-soft: #fde9dc;
+        --button: #111827;
+        --button-hover: #1f2937;
+        --button-text: #fffdf8;
       }
 
       * { box-sizing: border-box; }
@@ -113,7 +127,9 @@ cat > "${OUTPUT_PATH}" <<EOF
       body {
         margin: 0;
         color: var(--ink);
-        background: var(--bg);
+        background:
+          radial-gradient(circle at top left, rgba(154, 52, 18, 0.08), transparent 28%),
+          linear-gradient(180deg, #f7f1e8 0%, var(--bg) 100%);
         font-family: "Avenir Next", "Helvetica Neue", "Noto Sans", sans-serif;
       }
 
@@ -127,16 +143,18 @@ cat > "${OUTPUT_PATH}" <<EOF
       }
 
       .page {
-        width: min(980px, calc(100vw - 28px));
+        width: min(1060px, calc(100vw - 28px));
         margin: 0 auto;
         padding: 22px 0 40px;
       }
 
       .hero {
-        padding: 22px 24px;
+        padding: 24px 26px;
         border: 1px solid var(--line);
-        border-radius: 18px;
-        background: var(--panel);
+        border-radius: 24px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(255, 247, 240, 0.98));
+        box-shadow: 0 14px 40px rgba(73, 43, 24, 0.08);
       }
 
       .eyebrow {
@@ -169,16 +187,16 @@ cat > "${OUTPUT_PATH}" <<EOF
 
       .quick-grid {
         display: grid;
-        grid-template-columns: 1.2fr 0.8fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         margin-top: 18px;
       }
 
       .panel {
-        padding: 14px;
+        padding: 16px;
         border: 1px solid var(--line);
-        border-radius: 14px;
-        background: #fbfbfa;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.78);
       }
 
       .panel h3 {
@@ -197,9 +215,9 @@ cat > "${OUTPUT_PATH}" <<EOF
         margin: 0;
         padding: 10px 12px;
         overflow-x: auto;
-        border: 1px solid #ebe8e2;
+        border: 1px solid #e6dbcf;
         border-radius: 12px;
-        background: #f5f5f3;
+        background: #fffaf5;
         color: #171717;
         font-size: 0.87rem;
         line-height: 1.45;
@@ -239,26 +257,19 @@ cat > "${OUTPUT_PATH}" <<EOF
 
       .products {
         display: grid;
-        gap: 12px;
-      }
-
-      .product-card {
-        padding: 14px 16px;
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        background: var(--panel);
-      }
-
-      .product-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         gap: 10px;
       }
 
-      .product-head h2 {
-        margin: 0;
-        font-size: 1.05rem;
+      .file-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) auto minmax(0, 1.3fr);
+        gap: 14px;
+        align-items: center;
+        padding: 14px 16px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 8px 18px rgba(73, 43, 24, 0.04);
       }
 
       .version-badge {
@@ -271,56 +282,65 @@ cat > "${OUTPUT_PATH}" <<EOF
         color: #8a3b00;
       }
 
-      .product-desc {
-        margin: 8px 0 0;
+      .file-main {
+        min-width: 0;
+      }
+
+      .file-name-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .file-name {
+        font-family: "Iosevka Aile", "IBM Plex Sans", "SFMono-Regular", monospace;
+        font-size: 1rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .file-desc {
+        margin: 7px 0 0;
         color: var(--muted);
         line-height: 1.45;
         font-size: 0.92rem;
       }
 
-      .meta-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        margin: 12px 0;
-      }
-
-      .meta-grid div {
-        padding: 9px 10px;
-        border-radius: 12px;
-        background: #fbfbfa;
-        border: 1px solid var(--line);
-      }
-
-      .meta-grid dt {
-        margin-bottom: 4px;
-        color: var(--muted);
-        font-size: 0.72rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-
-      .meta-grid dd {
-        margin: 0;
-        overflow-wrap: anywhere;
-        font-size: 0.9rem;
-      }
-
-      .command-row {
-        display: grid;
-        grid-template-columns: 56px 1fr;
-        gap: 8px;
-        align-items: start;
-        margin-top: 8px;
-      }
-
-      .command-label {
-        display: inline-flex;
+      .file-actions {
+        display: flex;
         align-items: center;
-        height: 34px;
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.8rem;
+      }
+
+      .copy-button {
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 14px;
+        background: var(--button);
+        color: var(--button-text);
+        font: inherit;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.12s ease, background 0.12s ease;
+      }
+
+      .copy-button:hover {
+        background: var(--button-hover);
+        transform: translateY(-1px);
+      }
+
+      .copy-button.copied {
+        background: var(--accent);
+      }
+
+      .command-preview {
+        min-width: 0;
+        padding: 10px 12px;
+        border: 1px solid #e6dbcf;
+        border-radius: 14px;
+        background: #fffaf5;
+        overflow-x: auto;
       }
 
       footer {
@@ -342,21 +362,13 @@ cat > "${OUTPUT_PATH}" <<EOF
         }
 
         .quick-grid,
-        .meta-grid {
+        .file-row {
           grid-template-columns: 1fr;
         }
 
         .subhead {
           flex-direction: column;
           align-items: flex-start;
-        }
-
-        .command-row {
-          grid-template-columns: 1fr;
-        }
-
-        .command-label {
-          height: auto;
         }
       }
     </style>
@@ -365,20 +377,20 @@ cat > "${OUTPUT_PATH}" <<EOF
     <main class="page">
       <section class="hero">
         <p class="eyebrow">Reusable Flatpak Remote</p>
-        <h1>One remote. Small surface area.</h1>
+        <h1>Files on the left. Install on the right.</h1>
         <p class="hero-copy">
-          $(html_escape "${REMOTE_COMMENT}") Add the remote once, then install any package below by app ID.
+          $(html_escape "${REMOTE_COMMENT}") Pick a file below, then copy the exact one-line install command you want to run.
         </p>
         <div class="quick-grid">
           <section class="panel">
-            <h3>Add the remote</h3>
-            <p>Run once per machine.</p>
-            <pre><code>flatpak remote-add --if-not-exists $(command_escape "${REMOTE_NAME}") $(command_escape "${REMOTE_FILE_URL}")</code></pre>
+            <h3>Remote File</h3>
+            <p><a class="pill-link" href="$(html_escape "${REMOTE_FILE_URL}")">$(html_escape "${REMOTE_FILE_URL##*/}")</a></p>
+            <pre><code>$(command_escape "${remote_cmd}")</code></pre>
           </section>
           <section class="panel">
-            <h3>Links</h3>
-            <p>Remote metadata and raw repo.</p>
-            <p><a class="pill-link" href="$(html_escape "${REMOTE_FILE_URL}")">Open .flatpakrepo</a></p>
+            <h3>Repository</h3>
+            <p>Remote name: <code>$(html_escape "${REMOTE_NAME}")</code></p>
+            <p><a class="pill-link" href="$(html_escape "${REMOTE_HOMEPAGE}")">Repository owner</a></p>
             <p><a class="pill-link" href="$(html_escape "${REMOTE_URL}")">Browse OSTree repo</a></p>
           </section>
         </div>
@@ -387,10 +399,10 @@ cat > "${OUTPUT_PATH}" <<EOF
       <section>
         <div class="subhead">
           <div>
-            <h2>Package List</h2>
-            <p>Compact install targets from tracked upstream releases.</p>
+            <h2>File List</h2>
+            <p>Left side is the downloadable file. Right side is the command you can copy directly.</p>
           </div>
-          <a class="pill-link" href="$(html_escape "${REMOTE_HOMEPAGE}")">Repository owner</a>
+          <button class="copy-button" type="button" data-copy="$(attr_escape "${remote_cmd}")">Copy remote add</button>
         </div>
         <div class="products">
 ${products_html}
@@ -402,6 +414,29 @@ ${products_html}
         <code>$(html_escape "${DEFAULT_BRANCH}")</code>
       </footer>
     </main>
+    <script>
+      document.querySelectorAll('.copy-button').forEach((button) => {
+        button.addEventListener('click', async () => {
+          const text = button.dataset.copy || '';
+          if (!text) {
+            return;
+          }
+
+          try {
+            await navigator.clipboard.writeText(text);
+            const original = button.textContent;
+            button.textContent = 'Copied';
+            button.classList.add('copied');
+            window.setTimeout(() => {
+              button.textContent = original;
+              button.classList.remove('copied');
+            }, 1200);
+          } catch (error) {
+            console.error('Copy failed', error);
+          }
+        });
+      });
+    </script>
   </body>
 </html>
 EOF

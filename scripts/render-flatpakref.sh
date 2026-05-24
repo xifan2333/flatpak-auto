@@ -35,6 +35,7 @@ source "${product_file}"
 
 gpg_key="${GPG_KEY_BASE64:-BASE64_ENCODED_PUBLIC_KEY}"
 output_path="${2:-${ROOT_DIR}/refs/${APP_ID}.flatpakref.example}"
+is_runtime="${IS_RUNTIME:-false}"
 
 cat > "${output_path}" <<EOF
 [Flatpak Ref]
@@ -42,7 +43,7 @@ Version=1
 Name=${APP_ID}
 Branch=${BRANCH}
 Title=${TITLE}
-IsRuntime=false
+IsRuntime=${is_runtime}
 Url=${REMOTE_URL}
 RuntimeRepo=${RUNTIME_REPO}
 Homepage=${HOMEPAGE}

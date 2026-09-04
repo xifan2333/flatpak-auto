@@ -83,7 +83,11 @@ while IFS= read -r -d '' product_file; do
   product_env="${product_dir}/product.env"
   # shellcheck disable=SC1090
   source "${product_env}"
-  output_path="${ROOT_DIR}/refs/${APP_ID}.flatpakref"
+  if [[ "${BRANCH:-stable}" == "stable" ]]; then
+    output_path="${ROOT_DIR}/refs/${APP_ID}.flatpakref"
+  else
+    output_path="${ROOT_DIR}/refs/${APP_ID}.${BRANCH^}.flatpakref"
+  fi
   GPG_KEY_BASE64="${public_key_b64}" bash "${ROOT_DIR}/scripts/render-flatpakref.sh" "${product_name}" "${output_path}"
 done < <(find "${ROOT_DIR}/products" -mindepth 2 -maxdepth 2 -name product.env -print0 | sort -z)
 

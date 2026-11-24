@@ -6,5 +6,5 @@ Title=Vinput
 IsRuntime=false
 Url=https://flatpak.example.com/repo/
 RuntimeRepo=https://flathub.org/repo/flathub.flatpakrepo
-Homepage=https://github.com/xifan2333/fcitx5-vinput
+Homepage=https://github.com/fcitx5-vinput/fcitx5-vinput
 GPGKey=BASE64_ENCODED_PUBLIC_KEY

@@ -7,7 +7,7 @@ published from it.
 
 - App ID: `org.fcitx.Fcitx5.Addon.Vinput`
 - Branch: `stable`
-- Upstream repository: `xifan2333/fcitx5-vinput`
+- Upstream repository: `fcitx5-vinput/fcitx5-vinput`
 - Release artifact: `fcitx5-vinput.flatpak`
 
 ## Current Publishing Goal
@@ -27,7 +27,7 @@ The shared repository model remains unchanged:
 The upstream release pipeline currently publishes a Flatpak bundle asset:
 
 - file: `fcitx5-vinput.flatpak`
-- source: GitHub Releases from `xifan2333/fcitx5-vinput`
+- source: GitHub Releases from `fcitx5-vinput/fcitx5-vinput`
 
 The current upstream manifest characteristics are:
 

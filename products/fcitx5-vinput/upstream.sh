@@ -21,7 +21,7 @@ github_api_get() {
 }
 
 product_detect_latest() {
-  local api_url="https://api.github.com/repos/xifan2333/fcitx5-vinput/releases/latest"
+  local api_url="https://api.github.com/repos/fcitx5-vinput/fcitx5-vinput/releases/latest"
   local json_data version
 
   json_data="$(github_api_get "${api_url}")"
@@ -44,7 +44,7 @@ product_get_bundle_url() {
   local version="$1"
   local json_data api_url bundle_url
 
-  api_url="https://api.github.com/repos/xifan2333/fcitx5-vinput/releases/tags/v${version}"
+  api_url="https://api.github.com/repos/fcitx5-vinput/fcitx5-vinput/releases/tags/v${version}"
   json_data="$(github_api_get "${api_url}")"
   if [[ -z "${json_data}" ]]; then
     echo "Failed to fetch data from ${api_url}" >&2
